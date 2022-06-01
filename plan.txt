@@ -1,0 +1,42 @@
+
+1. i need to mmap some memory that i assign to g_heap_anchor.
+	1.1 if i'm assigning an additional heap, i assign it to (previous heap)->next.
+2. in the front i put a header that says "i got N bytes free", in the back i put a footer that says "there's N free bytes behind me".
+
+# MALLOC
+3. once a client tries to malloc some of that memory, i need to get a pointer that points to the start of the heap and move along it until i find a free memory header.
+4. if i find one, i need to check whether that header precedes the requested amount of free memory.
+	5. if it does, i replace the free header with occupied header and return the pointer.
+	6. if it does NOT, i continue to stroll along my mmaped region of memory.
+		7. if i find one, GOTO 5.
+		8. if i do NOT, GOTO 1.
+9. if i do NOT, GOTO 1.
+
+# FREE
+10. i get a pointer to some memory that the client wants to free
+11. i stroll along my heaps and check whether that pointer falls into their address space (start + size of heap)
+12. if i find a heap for which it holds true, i take a pointer to the start of the heap and iterate along it using sizes in headers.
+	13. if along the way i find a pointer that matches the one passed to free(), i put a free header in its place.
+		14. if (pointer + stored size) also contains a free header, i include its size in the current free header
+		    and update the coalesced free header's footer.
+		15. if (size & 1) == 0, which means that previous block is in NOT in use, i coalesce the blocks.
+
+# TODO: REALLOC
+
+# IDEA :
+	i'm required to use 3 groups of heaps: TINY, SMALL, AND LARGE.
+	TINY  : sequential first fit ?
+	SMALL : binary tree buddy first fit ?
+
+# IDEA 2 :
+	when the first malloc of TINY or SMALL size arrives, i mmap a SMALL heap.
+	the SMALL heap functions in the buddy allocation manner,
+	and the leftovers are used in TINY allocations.
+		could be too complicated, but sounds rather fancy
+	i guess this idea overturns everything i've written above.
+	but yeah, coalescence...
+
+# DRAFT :
+	TINY  : linear first-fit
+	SMALL : binary tree buddy first-fit
+	LARGE : individual mmaps
