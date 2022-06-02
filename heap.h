@@ -11,20 +11,16 @@
 int getpagesize();
 
 # define PAGE_SIZE getpagesize()
-# define TINY_HEAP_SIZE 4 * PAGE_SIZE
+# define TINY_HEAP_SIZE PAGE_SIZE
 # define SMALL_HEAP_SIZE 16 * PAGE_SIZE
 
 typedef enum heap_type {
-	TINY,
-	SMALL,
-	LARGE
+	TINY, SMALL, LARGE
 } t_heap_type;
 
 typedef struct s_heap {
 	struct s_heap	*next;
-	int		size;
-	// t_heap_type	type;
-	// int		chunk_count;
+	size_t		size;
 } t_heap;
 
 typedef struct s_type_size_pair {
@@ -34,34 +30,19 @@ typedef struct s_type_size_pair {
 
 typedef struct s_mem_request_handler {
 	t_heap*	heap_list;
-	// function pointer to look for properly sized free block
-	// function pointer to create heap if ^ not found
-} t_mem_request_handler;
+	void*	(*request)(size_t);
+	void	(*release)(void*);
+	// func pointer to create heap
+} t_mem_handler;
 
-/*
-typedef struct s_heap_anchor {
-	t_heap*	tiny;
-	t_heap*	small;
-	t_heap*	large;
-} t_heap_anchor;
+# define HEAP_OFFSET sizeof(t_heap)
 
-extern t_heap_anchor	g_heap_anchor;
-*/
+extern t_mem_handler	g_handlers[3];
 
-extern t_heap*	g_heap_anchor[3];
+t_heap*	create_heap(size_t req_size);
+t_heap* get_heap(size_t req_size);
 
-void	init_heap_anchor() __attribute__ ((constructor));
-
-// # IDEA
-// i really should think about the
-// __attribute__s constructor and destructor...
-
-// # STATIC
-// t_heap*	create_heap(int size);
-// t_heap*	append_heap(t_heap* heap);
-// t_heap_type adjust_size_to_type(int* size);
-
-// t_heap*	request_heap(int memory_request_size);
-// int	release_heap(t_heap* heap);
+void	init_handlers() __attribute__ ((constructor));
+// munmaping destructor
 
 #endif
