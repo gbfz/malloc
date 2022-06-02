@@ -49,6 +49,8 @@ typedef struct __free_small_header* free_small_header;
 # define TINY_HEADER_OFFSET sizeof(struct __free_tiny_header)
 # define SMALL_HEADER_OFFSET sizeof(struct __free_small_header)
 
+# define ALIGN_8(x) (x = (x + 7) & ~7)
+
 void*	request_tiny_block(size_t req_size);
 void	release_tiny_block(void* ptr);
 

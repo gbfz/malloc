@@ -4,7 +4,7 @@
 static inline
 void*	fragment_block(free_tiny_header allocated_chunk, size_t req_size)
 {
-	free_tiny_header chunk = allocated_chunk + req_size;
+	free_tiny_header chunk = ((void*)allocated_chunk + req_size);
 	chunk->prev_block_size = req_size;
 	chunk->block_size = allocated_chunk->block_size - req_size;
 	chunk->next = allocated_chunk->next;
@@ -17,7 +17,7 @@ void*	fragment_block(free_tiny_header allocated_chunk, size_t req_size)
 }
 
 static inline
-void*	request_block_from_heap(const t_heap* heap, size_t req_size)
+void*	request_tiny_block_impl(const t_heap* heap, size_t req_size)
 {
 	header chunk = (header)heap + HEAP_OFFSET;
 	size_t distance = HEAP_OFFSET;
@@ -39,16 +39,16 @@ void*	request_block_from_heap(const t_heap* heap, size_t req_size)
 inline
 void*	request_tiny_block(size_t req_size)
 {
-	req_size = (req_size + 7) & ~7;
+	ALIGN_8(req_size);
 	t_heap*	heap = g_handlers[TINY].heap_list;
 	void*	mem = NULL;
 	while (!mem && heap) {
-		mem = request_block_from_heap(heap, req_size);
+		mem = request_tiny_block_impl(heap, req_size);
 		heap = heap->next;
 	}
 	if (mem) return mem;
 	t_heap* new_heap = create_heap(req_size);
 	if (!new_heap)
 		return NULL;
-	return request_block_from_heap(new_heap, req_size);
+	return request_tiny_block_impl(new_heap, req_size);
 }

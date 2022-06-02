@@ -2,8 +2,9 @@
 #include "block.h"
 
 static inline
-free_tiny_header	locate_ptr_in_heap(const t_heap* heap, const void* ptr) {
-	header h = (header)(heap + HEAP_OFFSET);
+free_tiny_header locate_ptr_in_heap(const t_heap* heap, const void* ptr)
+{
+	header h = (void*)(heap + HEAP_OFFSET);
 	ptr -= TINY_HEADER_OFFSET;
 	while (ptr != h)
 		h += h->block_size;
@@ -11,7 +12,8 @@ free_tiny_header	locate_ptr_in_heap(const t_heap* heap, const void* ptr) {
 }
 
 static inline
-void	merge_with_next_chunk(free_tiny_header chunk) {
+void	merge_with_next_chunk(free_tiny_header chunk)
+{
 	if (chunk->next == NULL)
 		return;
 	free_tiny_header next_chunk = chunk->next;
@@ -22,7 +24,8 @@ void	merge_with_next_chunk(free_tiny_header chunk) {
 }
 
 static inline
-void	merge_with_prev_chunk(free_tiny_header chunk) {
+void	merge_with_prev_chunk(free_tiny_header chunk)
+{
 	free_tiny_header prev_chunk = chunk->next;
 	if (prev_chunk == NULL)
 		return;
@@ -33,7 +36,8 @@ void	merge_with_prev_chunk(free_tiny_header chunk) {
 }
 
 static inline
-void	release_tiny_block_impl(t_heap* heap, void *ptr) {
+void	release_tiny_block_impl(t_heap* heap, void *ptr)
+{
 	free_tiny_header chunk = locate_ptr_in_heap(heap, ptr);
 	merge_with_next_chunk(chunk);
 	merge_with_prev_chunk(chunk);
@@ -41,13 +45,15 @@ void	release_tiny_block_impl(t_heap* heap, void *ptr) {
 }
 
 static inline
-int	is_in_address_space(const t_heap* heap, const void *_ptr) {
-	t_heap* ptr = (t_heap*)_ptr;
+int	is_in_address_space(const t_heap* heap, const void *m_ptr)
+{
+	t_heap* ptr = (t_heap*)m_ptr;
 	return ptr >= heap && ptr <= (heap + heap->size);
 }
 
 inline
-void	release_tiny_block(void* ptr) {
+void	release_tiny_block(void* ptr)
+{
 	t_heap* heap = g_handlers[TINY].heap_list;
 	if (ptr == NULL || heap == NULL)
 		return;
