@@ -11,7 +11,7 @@
 int getpagesize();
 
 # define PAGE_SIZE getpagesize()
-# define TINY_HEAP_SIZE PAGE_SIZE
+# define TINY_HEAP_SIZE 4 * PAGE_SIZE
 # define SMALL_HEAP_SIZE 16 * PAGE_SIZE
 
 typedef enum heap_type {
@@ -32,7 +32,8 @@ typedef struct s_mem_request_handler {
 	t_heap*	heap_list;
 	void*	(*request)(size_t);
 	void	(*release)(void*);
-	// func pointer to create heap
+	t_heap*	(*create_heap)(size_t size);
+	t_heap_type (*get_type)(size_t size);
 } t_mem_handler;
 
 # define HEAP_OFFSET sizeof(t_heap)

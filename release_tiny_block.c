@@ -7,7 +7,7 @@ free_tiny_header locate_ptr_in_heap(const t_heap* heap, const void* ptr)
 	header h = (void*)(heap + HEAP_OFFSET);
 	ptr -= TINY_HEADER_OFFSET;
 	while (ptr != h)
-		h += h->block_size;
+		h += h->size;
 	return (free_tiny_header)h;
 }
 
@@ -17,7 +17,7 @@ void	merge_with_next_chunk(free_tiny_header chunk)
 	if (chunk->next == NULL)
 		return;
 	free_tiny_header next_chunk = chunk->next;
-	chunk->block_size += next_chunk->block_size;
+	chunk->size += next_chunk->size;
 	chunk->next = next_chunk->next;
 	if (next_chunk->next)
 		next_chunk->next->prev = chunk;
@@ -29,7 +29,7 @@ void	merge_with_prev_chunk(free_tiny_header chunk)
 	free_tiny_header prev_chunk = chunk->next;
 	if (prev_chunk == NULL)
 		return;
-	prev_chunk->block_size += chunk->block_size;
+	prev_chunk->size += chunk->size;
 	prev_chunk->next = chunk->next;
 	if (chunk->next)
 		chunk->next->prev = prev_chunk;
