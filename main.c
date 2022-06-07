@@ -14,7 +14,7 @@ void ft_free(void* ptr) {
 	g_handlers[TINY].release(ptr);
 }
 
-int main() {
+void test1() {
 	char* ptr = ft_malloc(27);
 	for (int i = 0; i < 26; ++i)
 		ptr[i] = 'a' + i;
@@ -23,15 +23,34 @@ int main() {
 	char *o = ft_malloc(33);
 	memset(o, 'F', 32);
 	o[32] = '\0';
+	show_alloc_mem();
 	ft_free(ptr);
 	printf("%s\n", o);
 	ft_free(o);
+	show_alloc_mem();
 	char *a = ft_malloc(300);
 	if (a == NULL)
-		return 1;
+		return;
 	memset(a, '|', 19);
 	memset(a + 19, '.', 19);
 	a[19 * 2] = '\0';
 	printf("%s\n", a);
 	ft_free(a);
+}
+
+void test2() {
+	void* a = ft_malloc(32);
+	show_alloc_mem();
+	void* b = ft_malloc(319);
+	show_alloc_mem();
+	ft_free(a);
+	ft_free(b);
+	show_alloc_mem();
+	void* c = ft_malloc(1);
+	show_alloc_mem();
+	ft_free(c);
+}
+
+int main() {
+	test2();
 }

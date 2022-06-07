@@ -13,10 +13,10 @@ t_heap*	create_heap_impl(size_t size) {
 		return MAP_FAILED;
 	heap->next = NULL;
 	heap->size = size;
-	header h = (header)heap + HEAP_OFFSET;
-	h->prev_block_size = 0;
-	h->size = size - HEAP_OFFSET;
-	MARK_FREE(h);
+	t_header header = (t_header)heap + HEAP_OFFSET;
+	header->prev_block_size = 0;
+	header->size = size - HEAP_OFFSET;
+	MARK_FREE(header);
 	return heap;
 }
 
@@ -79,17 +79,47 @@ t_heap*	create_heap(size_t req_size) {
 }
 
 void	init_handlers() {
-	g_handlers[TINY ].heap_list = NULL;
-	g_handlers[TINY ].create_heap = create_tiny_heap;
-	g_handlers[TINY ].request   = request_tiny_block;
-	g_handlers[TINY ].release   = release_tiny_block;
-	g_handlers[TINY ].get_type  = get_type;
-	g_handlers[SMALL].heap_list = NULL;
-	g_handlers[SMALL].request   = NULL;;
-	g_handlers[SMALL].release   = NULL;
-	g_handlers[SMALL].get_type  = get_type;
-	g_handlers[LARGE].heap_list = NULL;;
-	g_handlers[LARGE].request   = NULL;
-	g_handlers[LARGE].release   = NULL;
-	g_handlers[LARGE].get_type  = NULL;
+	t_mem_handler* tiny = &g_handlers[TINY];
+	t_mem_handler* small = &g_handlers[SMALL];
+	t_mem_handler* large = &g_handlers[LARGE];
+
+	tiny->heap_list = NULL;
+	small->heap_list = NULL;
+	large->heap_list = NULL;
+
+	tiny->create_heap = create_tiny_heap;
+	small->create_heap = create_small_heap;
+	large->create_heap = create_large_heap;
+
+	tiny->request = request_tiny_block;
+	small->request = NULL; // request_small_heap
+	large->request = NULL; // create_large_heap
+
+	tiny->release = release_tiny_block;
+	small->release = NULL; // release_small_heap
+	large->release = NULL; // delete_large_heap
+
+	tiny->get_type = get_type;
+	small->get_type	= get_type;
+	large->get_type	= get_type;
+
+	/*
+	g_handlers[TINY ].heap_list	= NULL;
+	g_handlers[TINY ].create_heap	= create_tiny_heap;
+	g_handlers[TINY ].request	= request_tiny_block;
+	g_handlers[TINY ].release	= release_tiny_block;
+	g_handlers[TINY ].get_type	= get_type;
+
+	g_handlers[SMALL].create_heap	= create_small_heap;
+	g_handlers[SMALL].heap_list	= NULL;
+	g_handlers[SMALL].request	= NULL; // request_small_heap
+	g_handlers[SMALL].release	= NULL; // release_small_heap
+	g_handlers[SMALL].get_type	= get_type;
+
+	g_handlers[LARGE].create_heap	= create_large_heap;
+	g_handlers[LARGE].heap_list	= NULL;
+	g_handlers[LARGE].request	= NULL; // create_large_heap
+	g_handlers[LARGE].release	= NULL; // delete_large_heap
+	g_handlers[LARGE].get_type	= get_type;
+	*/
 }
