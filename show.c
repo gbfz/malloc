@@ -1,21 +1,18 @@
 #include "memory.h"
-#include "utils.h"
 
 static inline
 void	show_alloc_mem_impl(const t_heap* heap)
 {
-	if (!heap)
+	if (heap == NULL)
 		return;
-	const t_heap* heap_end = heap + heap->size;
-	const t_header* block = (t_header*)heap + HEAP_OFFSET;
-	while (ptr_cmp(block, heap_end) == -1 && block->size) {
-		if (IS_ALLOCATED(block)) {
-			const t_header* block_end = block + SIZE_MASK(block->size);
-			/* XXX i can't use printf, right? */
-			// printf("block size : %zu\n", SIZE_MASK(block->size));
+	const t_header* heap_end = (t_header*)heap + heap->size;
+	const t_header* block = (t_header*)heap + sizeof(t_heap);
+	while (ptr_cmp(block, heap_end) < 0 && block->size) {
+		if (is_allocated(block)) {
+			const t_header* block_end = block + size_mask(block->size);
 			printf("%p - %p : %zu\n", block, block_end, block_end - block);
 		}
-		block += SIZE_MASK(block->size);
+		block += size_mask(block->size);
 	}
 	show_alloc_mem_impl(heap->next);
 }

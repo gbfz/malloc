@@ -1,5 +1,4 @@
 #include "memory.h"
-#include "utils.h"
 
 static inline
 t_heap*	create_heap_impl(size_t size)
@@ -12,12 +11,9 @@ t_heap*	create_heap_impl(size_t size)
 		return MAP_FAILED;
 	heap->next = NULL;
 	heap->size = size;
-	t_header* free_mem = (t_header*)heap + HEAP_OFFSET;
-	free_mem->size = heap->size - HEAP_OFFSET;
-	MARK_FREE(free_mem);
-	t_header* heap_end = (t_header*)heap + (heap->size / sizeof(heap->size)) - sizeof(t_header);
-	heap_end->size = 0;
-	MARK_END(heap_end);
+	t_header* free_mem = (t_header*)heap + sizeof(t_heap);
+	free_mem->size = round_to_eight(heap->size - sizeof(t_heap));
+	mark_free(free_mem);
 	return heap;
 }
 
@@ -89,37 +85,23 @@ void	delete_large_heap(t_heap* heap)
 	delete_heap_impl(&g_handlers[LARGE].heap_list, heap);
 }
 
-/*
-t_heap_type	get_heap_type(size_t size)
-{
-	if (size <= TINY_HEAP_SIZE)
-		return TINY;
-	if (size <= SMALL_HEAP_SIZE)
-		return SMALL;
-	return LARGE;
-}
-*/
-
 t_mem_handler	g_handlers[3] = {0};
 
 void	init_heap_handlers()
 {
 	t_mem_handler*	tiny  = &g_handlers[TINY];
-	UNUSED /* YET */ t_mem_handler*	small = &g_handlers[SMALL];
-	UNUSED /* YET */ t_mem_handler*	large = &g_handlers[LARGE];
+	t_mem_handler*	small = &g_handlers[SMALL];
+	t_mem_handler*	large = &g_handlers[LARGE];
 
 	tiny->heap_list = NULL;
-	tiny->heap_size_type = TINY_HEAP_SIZE;
 	tiny->create_heap = create_tiny_heap;
 	tiny->delete_heap = delete_tiny_heap;
 
 	small->heap_list = NULL;
-	small->heap_size_type = SMALL_HEAP_SIZE;
 	small->create_heap = create_small_heap;
 	small->delete_heap = delete_small_heap;
 
 	large->heap_list = NULL;
-	large->heap_size_type = LARGE_HEAP_SIZE;
 	large->create_heap = create_large_heap;
 	large->delete_heap = delete_large_heap;
 	large->request = (void* (*)(size_t))create_large_heap; //

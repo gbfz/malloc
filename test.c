@@ -1,5 +1,4 @@
 #include "memory.h"
-#include <string.h>
 
 void*	ft_malloc(size_t size)
 {
@@ -8,7 +7,7 @@ void*	ft_malloc(size_t size)
 
 void	ft_free(void* ptr)
 {
-	g_handlers[TINY].release(ptr);
+	// g_handlers[TINY].release(ptr);
 }
 
 void test1()
@@ -18,7 +17,7 @@ void test1()
 		a[i] = 'a' + i;
 	a[26] = '\0';
 	printf("%s\n", a);
-	// show_alloc_mem();
+	show_alloc_mem();
 	int* b = ft_malloc(50 * sizeof(int));
 	for (int i = 0; i < 50; ++i)
 		b[i] = i;
@@ -27,6 +26,7 @@ void test1()
 	printf("\n");
 	show_alloc_mem();
 	// char* c = ft_malloc(12000);
+	// char* d = ft_malloc(12000);
 	// ft_free(a);
 	// ft_free(b);
 }
